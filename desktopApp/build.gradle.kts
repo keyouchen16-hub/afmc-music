@@ -208,6 +208,8 @@ compose.desktop {
                 }
             }
             windows {
+                // AFMC MUSIC: 装到当前用户目录，免管理员权限
+                perUserInstall = true
                 includeAllModules = true
                 packageVersion =
                     libs.versions.version.name
