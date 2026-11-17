@@ -1,0 +1,51 @@
+name: Build AFMC MUSIC for Windows
+
+# 在 GitHub 的 Windows 机器上编译 AFMC MUSIC，产出 .msi 安装包。
+# 推送到 main 分支或在 Actions 页面手动点 "Run workflow" 都会触发。
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  windows-msi:
+    name: Windows .msi
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: microsoft
+          cache: gradle
+
+      - name: Generate aboutLibraries.json
+        shell: bash
+        run: ./gradlew exportLibraryDefinitions --no-configuration-cache
+
+      - name: Download mpv player natives
+        shell: bash
+        run: ./gradlew :composeApp:mpvSetupAll --no-configuration-cache
+
+      - name: Build .msi
+        shell: bash
+        run: ./gradlew :desktopApp:packageMsi --no-configuration-cache --stacktrace
+
+      - name: Show output
+        shell: bash
+        run: find desktopApp/build/compose/binaries -name "*.msi" -exec ls -lh {} \;
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: AFMC-MUSIC-Windows-msi
+          path: desktopApp/build/compose/binaries/**/msi/*.msi
+          if-no-files-found: error
