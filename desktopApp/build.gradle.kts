@@ -149,6 +149,8 @@ compose.desktop {
     application {
         mainClass = "com.maxrave.simpmusic.MainKt"
         jvmArgs += "--add-opens=java.base/java.nio=ALL-UNNAMED"
+        // AFMC MUSIC: 跟随 Windows 系统代理（如 Clash）
+        jvmArgs += "-Djava.net.useSystemProxies=true"
 
         nativeDistributions {
             appResourcesRootDir = rootDir.resolve("mpv-natives/")
@@ -211,10 +213,12 @@ compose.desktop {
                 // AFMC MUSIC: 装到当前用户目录，免管理员权限
                 perUserInstall = true
                 includeAllModules = true
-                packageVersion =
-                    libs.versions.version.name
-                        .get()
-                        .removeSuffix("-hf")
+                // AFMC MUSIC: 开始菜单 + 桌面快捷方式，固定升级 ID，版本号随编译次数递增
+                menu = true
+                shortcut = true
+                menuGroup = "AFMC MUSIC"
+                upgradeUuid = "6f1c2a9e-4b7d-4e3a-9c1f-a5f0c3d8e217"
+                packageVersion = "2.6.${100 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0)}"
                 iconFile.set(rootDir.resolve("composeApp/icon/circle_app_icon.ico"))
             }
             linux {
